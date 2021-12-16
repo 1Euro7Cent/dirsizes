@@ -1,0 +1,28 @@
+{
+  "name": "dirsizes",
+  "version": "1.0.3",
+  "description": "This checks the size of all dirs and files and sorts them by size",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "size",
+    "sort",
+    "dir",
+    "file",
+    "directory",
+    "files",
+    "MaxSize"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bin": {
+    "dirsizes": "./index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/1Euro7Cent/dirsizes.git"
+  },
+  "homepage": "https://github.com/1Euro7Cent/dirsizes#readme"
+}
