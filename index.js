@@ -5,8 +5,10 @@
 const fs = require('fs');
 const path = require('path');
 
-var args = process.argv.slice(2);
-console.log(args)
+
+
+
+
 
 /**
  * sort object by size
@@ -94,7 +96,7 @@ function check(dir) {
             let file = path.join(dir, files[i]);
             let stat = fs.statSync(file);
             if (stat && stat.isDirectory()) {
-                // console.log(`checking ${file}... `);
+                // onLog(`checking ${file}... `);
                 size += check(file);
             } else {
                 size += stat.size;
@@ -102,7 +104,7 @@ function check(dir) {
         }
     }
     catch (err) {
-        console.log(err)
+        onLog(err)
         size = -1
     }
     return size;
@@ -113,7 +115,7 @@ function check(dir) {
  * @returns 
  */
 function all(dir) {
-    // console.log(dir);
+    // onLog(dir);
     var sizes = {};
     var fileSizes = {};
     let files = fs.readdirSync(dir);
@@ -122,41 +124,89 @@ function all(dir) {
         try {
             let stat = fs.statSync(file);
             if (stat && stat.isDirectory()) {
-                process.stdout.write(`checking ${file}... `);
-                // console.log(`checking ${file}`);
+                onLogWON(`checking ${file}... `);
+                // onLog(`checking ${file}`);
                 sizes[file] = check(file);
-                console.log('done: ' + humanReadableSize(sizes[file]));
+                onLog('done: ' + humanReadableSize(sizes[file]));
             } else {
                 // if (!sizes['files']) sizes['files'] = {};
                 fileSizes[file] = stat.size;
             }
         }
         catch (err) {
-            console.log(err)
+            onLog(err)
         }
     }
     return { fileSizes, sizes };
 }
-// /*
-var startTime = Date.now();
-var result = all(args[0] ? args.join(' ') : './')
 
-console.log('Time took:')
-console.table(humanReadableTime(Date.now() - startTime))
-// log result and fileresult separately to console
-for (var key in result) {
-    var data = sortBySize(result[key])
-    var readable = humanReadable(data);
-    console.log(key + ':');
-    console.table(readable)
+/**
+ * 
+ * @param {string} dir path to check
+ * @param {boolean} pretty if all values should be prettyfied. Default: true
+ */
+function getSize(dir, pretty = true) {
+    var startTime = Date.now()
+    var sizes = all(dir);
+    for (var key in sizes) {
+        var data = sortBySize(sizes[key])
+        if (pretty) {
+            sizes[key] = humanReadable(data);
+        }
+    }
+
+    var endTime = Date.now()
+    var time = endTime - startTime;
+    var humanTime
+    if (pretty) humanTime = humanReadableTime(time);
+    else {
+        humanTime = time;
+    }
+
+    return {
+        dirs: sizes.sizes,
+        files: sizes.fileSizes,
+        timeTook: humanTime
+    }
+
+
 }
-// console.log(`Total time: ${humanReadableTime(Date.now() - startTime)}`);
-//*/
+function onLog(...args) {
+    console.log(...args);
+}
+function onLogWON(args) {
+    process.stdout.write(args);
+}
+function setOnLog(func) {
+    onLog = func;
+}
+function setOnLogWON(func) {
+    onLogWON = func;
+}
+module.exports = {
+    getSize,
+    setOnLog,
+    setOnLogWON
+}
+
+if (require.main === module) {
+    onLog('called directly');
+    var args = process.argv.slice(2);
+    onLog(args)
+    var startTime = Date.now();
+    var result = all(args[0] ? args.join(' ') : './')
+
+    onLog('Time took:')
+    console.table(humanReadableTime(Date.now() - startTime))
+    // log result and fileresult separately to console
+    for (var key in result) {
+        var data = sortBySize(result[key])
+        var readable = humanReadable(data);
+        onLog(key + ':');
+        console.table(readable)
+    }
+} else {
+    onLog('required as a module');
+}
 
 
-
-
-// var data = sortBySize(result.sizes)
-// var readable = humanReadable(data);
-// console.log(readable);
-// console.table(readable)
